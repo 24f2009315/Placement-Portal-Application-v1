@@ -1,0 +1,30 @@
+{% extends "company/layout.html" %}
+{% block body %}
+<div class="signup-form">
+    <form action="{{ url_for('auth_api.company_signup') }}" method="post">
+      <h3>Company Registration</h3>
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-control" name="name" placeholder="Enter your username" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" name="username" placeholder="Enter your username" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" placeholder="Enter your password" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">HR Contact</label>
+        <input type="text" class="form-control" name="hr_contact" placeholder="Enter your username" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Website</label>
+        <input type="text" class="form-control" name="website" placeholder="Enter your username" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Register</button>
+    </form><br>
+    <a href="/"><button type="submit" class="btn btn-primary">Back</button></a>
+</div>
+{% endblock %}

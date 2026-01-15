@@ -3,23 +3,25 @@ from flask_login import UserMixin
 
 db=SQLAlchemy()
 
-class Admin(db.Model, UserMixin):
-    __tablename__ = "admin"
+class Users(db.Model, UserMixin):
+    __tablename__ = "users"
 
-    admin_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(50), default="admin")  # admin
+    role = db.Column(db.String(20),nullable=False)
     is_active = db.Column(db.Boolean(), default=True)
 
-class Student(db.Model, UserMixin):
+    def get_id(self):
+        return str(self.user_id)
+
+class Student(db.Model):
     __tablename__ = "student"
 
     student_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer(),db.ForeignKey("users.user_id"),nullable=False,unique=True)
     roll_no = db.Column(db.String(20), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(15))
     department = db.Column(db.String(50))
     degree = db.Column(db.String(50))
@@ -28,7 +30,6 @@ class Student(db.Model, UserMixin):
     resume_url = db.Column(db.String(255))
     is_placed = db.Column(db.Boolean(), default=False)
     status = db.Column(db.String(20), default="active")  # active / blocked
-    password = db.Column(db.String(255), nullable=False)
 
 class JobPosition(db.Model):
     __tablename__ = "job_position"
@@ -51,9 +52,9 @@ class Placement(db.Model):
     __tablename__ = "placement"
 
     drive_id = db.Column(db.Integer(),primary_key=True,autoincrement=True)
-    company_id = db.Column(db.Integer(),nullable=False)
+    company_id = db.Column(db.Integer(),db.ForeignKey("company.company_id"),nullable=False)
     title=db.Column(db.String(50))
-    description=db.Column(db.String(1000))
+    description=db.Column(db.Text())
     eligibility=db.Column(db.String(200))
     deadline=db.Column(db.Date())
     status=db.Column(db.String(30)) #open/closed
@@ -72,7 +73,7 @@ class  Company(db.Model):
     __tablename__ = "company"
 
     company_id = db.Column(db.Integer(),primary_key=True,autoincrement=True)
-    name=db.Column(db.String(50))
-    HR_contact=db.Column(db.Integer(),unique=True)
+    user_id = db.Column(db.Integer(),db.ForeignKey("users.user_id"),nullable=False,unique=True)
+    HR_contact=db.Column(db.String(15),unique=True)
     website=db.Column(db.String(200)) #url
-    status=db.Column(db.Stirng(30)) #approved or pending or rejected
+    status=db.Column(db.String(30)) #approved or pending or rejected

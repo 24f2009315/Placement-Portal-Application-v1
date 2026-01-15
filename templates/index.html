@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Home | Placement Portal{% endblock %}
+
+{% block content %}
+<h2>Welcome to the Placement Portal</h2>
+
+<p>
+    This platform manages campus placements for students, companies, and administrators.
+</p>
+
+<ul>
+    <li>Students can apply for placement drives</li>
+    <li>Companies can post job positions after approval</li>
+    <li>Admins manage approvals and applications</li>
+</ul>
+
+<a href="{{ url_for('auth_api.login') }}"><button>Login</button></a>
+<a href="{{ url_for('auth_api.student_signup') }}"><button>Student Registration</button></a>
+<a href="{{ url_for('auth_api.company_signup') }}"><button>Company Registration</button></a>
+{% endblock %}
