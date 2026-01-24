@@ -26,11 +26,16 @@ def login():
         if not user or not check_password_hash(user.password,password):
             flash("Invalid User",category="invalid-email")
             return redirect(url_for("auth_api.login"))
-
-        company=Company.query.filter_by(username=username).first()
-        if company.status != "approved":
-            flash("you cant login until approved")
-            return redirect("/login")
+        
+        if not user.is_active:
+            flash("Account disabled", category="warning")
+            return redirect(url_for("auth_api.login"))
+    
+        if user.role == "company":
+            company=Company.query.filter_by(user_id=user.user_id).first()
+            if company.status != "approved":
+                flash("you cant login until approved")
+                return redirect(url_for("auth_api.login"))
         
         login_user(user)
         flash("Login Successful",category="success")
@@ -62,11 +67,11 @@ def company_signup():
             flash("both name and username are reuqired",category="warning")
             return render_template("company/signup.html")
         
-        new_user = Users(name=name,username=username,password=generate_password_hash(password),role="company")
+        new_user = Users(name=name,username=username,password=generate_password_hash(password,method="pbkdf2:sha256"),role="company",is_active=True)
         db.session.add(new_user)
         db.session.commit()
 
-        new_company = Company(new_user.user_id,hr_contact=hr_contact,website=website,status="pending")
+        new_company = Company(name=name,user_id=new_user.user_id,hr_contact=hr_contact,website=website,status="pending")
         db.session.add(new_company)
         db.session.commit()
 
@@ -100,13 +105,13 @@ def student_signup():
             flash("both name and username are reuqired",category="warning")
             return render_template("student/signup.html")
         
-        new_user = Users(name=name,username=username,password=generate_password_hash(password),role="student")
+        new_user = Users(name=name,username=username,password=generate_password_hash(password,method="pbkdf2:sha256"),role="student",is_active=True)
         db.session.add(new_user)
         db.session.commit()
 
-        new_student = Student(user_id=new_user.user_id,roll_no=roll_no,phone=phone,department=department,degree=degree,batch_year=batch_year,cgpa=cgpa,resume_url=resume_url,is_placed=False,status="Active")
+        new_student = Student(name=name,user_id=new_user.user_id,roll_no=roll_no,phone=phone,department=department,degree=degree,batch_year=batch_year,cgpa=cgpa,resume_url=resume_url,is_placed=False,status="Active")
         db.session.add(new_student)
         db.session.commit()
 
         flash("Registration Successful",category="success")
-        return render_template("student/signup.html")
+        return render_template("index.html")

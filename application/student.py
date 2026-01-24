@@ -6,6 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 api = Blueprint("student_api",__name__)
 
 @api.route("/student_dashboard",methods=["GET","POST","PUT","PATCH","DELETE"])
+@login_required
 def student_dashboard():
-    if request.method == "GET":
-        return render_template("student/dashboard.html")
+    if current_user.role != "student":
+        return redirect(url_for("auth_api.login"))
+    return render_template("student/dashboard.html")

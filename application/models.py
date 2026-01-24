@@ -19,6 +19,8 @@ class Users(db.Model, UserMixin):
 class Student(db.Model):
     __tablename__ = "student"
 
+    user = db.relationship("Users", backref="student", lazy=True)
+    name = db.Column(db.String(150), nullable=False)
     student_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer(),db.ForeignKey("users.user_id"),nullable=False,unique=True)
     roll_no = db.Column(db.String(20), unique=True, nullable=False)
@@ -72,8 +74,10 @@ class Application(db.Model):
 class  Company(db.Model):
     __tablename__ = "company"
 
+    user = db.relationship("Users", backref="company", lazy=True)
+    name = db.Column(db.String(150), nullable=False)
     company_id = db.Column(db.Integer(),primary_key=True,autoincrement=True)
     user_id = db.Column(db.Integer(),db.ForeignKey("users.user_id"),nullable=False,unique=True)
-    HR_contact=db.Column(db.String(15),unique=True)
+    hr_contact=db.Column(db.String(15),unique=True)
     website=db.Column(db.String(200)) #url
     status=db.Column(db.String(30)) #approved or pending or rejected
