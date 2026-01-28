@@ -41,9 +41,12 @@ def login():
         flash("Login Successful",category="success")
 
         if user.role == "student":
-            return redirect(url_for("student_api.student_dashboard"))
+            return render_template("student_api.student_dashboard")
         elif user.role == "company":
-            return redirect(url_for("company_api.company_dashboard"))
+            if company.status == "approved":
+                return render_template("company_api.company_dashboard")
+            else:
+                return redirect(url_for("auth_api.login"))
         return redirect(url_for("admin_api.admin_dashboard"))
 
 @api.route("/company_signup",methods=["GET","POST"])
@@ -109,7 +112,7 @@ def student_signup():
         db.session.add(new_user)
         db.session.commit()
 
-        new_student = Student(name=name,user_id=new_user.user_id,roll_no=roll_no,phone=phone,department=department,degree=degree,batch_year=batch_year,cgpa=cgpa,resume_url=resume_url,is_placed=False,status="Active")
+        new_student = Student(name=name,user_id=new_user.user_id,roll_no=roll_no,phone=phone,department=department,degree=degree,batch_year=batch_year,cgpa=cgpa,resume_url=resume_url,is_placed=False,status="active")
         db.session.add(new_student)
         db.session.commit()
 

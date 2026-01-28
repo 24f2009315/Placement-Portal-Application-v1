@@ -1,8 +1,33 @@
 {% extends "admin/layout.html" %}
 {% block body %}
-<h2>Companies</h2>
+<h2>Registered Companies</h2>
 <div class="container-fluid d-flex flex-wrap">
     {% for com in all_companies %}
+    {% if com.status == "approved" %}
+        <div class="card col-3 m-2">
+            <div class="card-body">
+                <h3 align="center">{{ com.user.name }}</h3>
+                <p>Status: {{ com.status }}</p>
+                <form method="POST" action="{{ url_for('admin_api.delete_company', company_id=com.company_id) }}">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin_api.reject_company', company_id=com.company_id) }}">
+                    <button class="btn btn-warning btn-sm">Reject</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin_api.blacklist_company', company_id=com.company_id) }}">
+                    <button class="btn btn-dark btn-sm">Blacklist</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    {% endfor %}
+</div>
+<h2>Company Applications</h2>
+<div class="container-fluid d-flex flex-wrap">
+    {% for com in all_companies %}
+    {% if com.status == "pending" %}
         <div class="card col-3 m-2">
             <div class="card-body">
                 <h3 align="center">{{ com.user.name }}</h3>
@@ -24,11 +49,61 @@
                 </form>
             </div>
         </div>
+    {% endif %}
     {% endfor %}
 </div>
-<h2>Students</h2>
+<h2>Blacklisted Companies</h2>
+<div class="container-fluid d-flex flex-wrap">
+    {% for com in all_companies %}
+    {% if com.status == "blacklisted" %}
+        <div class="card col-3 m-2">
+            <div class="card-body">
+                <h3 align="center">{{ com.user.name }}</h3>
+                <p>Status: {{ com.status }}</p>
+                <form method="POST" action="{{ url_for('admin_api.delete_company', company_id=com.company_id) }}">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin_api.approve_company', company_id=com.company_id) }}">
+                    <button class="btn btn-success btn-sm">Approve</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin_api.reject_company', company_id=com.company_id) }}">
+                    <button class="btn btn-warning btn-sm">Reject</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    {% endfor %}
+</div>
+<h2>Rejected Companies</h2>
+<div class="container-fluid d-flex flex-wrap">
+    {% for com in all_companies %}
+    {% if com.status == "rejected" %}
+        <div class="card col-3 m-2">
+            <div class="card-body">
+                <h3 align="center">{{ com.user.name }}</h3>
+                <p>Status: {{ com.status }}</p>
+                <form method="POST" action="{{ url_for('admin_api.delete_company', company_id=com.company_id) }}">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin_api.approve_company', company_id=com.company_id) }}">
+                    <button class="btn btn-success btn-sm">Approve</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin_api.blacklist_company', company_id=com.company_id) }}">
+                    <button class="btn btn-dark btn-sm">Blacklist</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+    {% endfor %}
+</div>
+<h2>Registered Students</h2>
 <div class="container-fluid d-flex flex-wrap">
     {% for stu in all_students %}
+    {% if stu.status == "active" %}
         <div class="card col-3 m-2">
             <div class="card-body">
                 <h3 align="center">{{ stu.user.name }}</h3>
@@ -42,6 +117,27 @@
                 </form>
             </div>
         </div>
+    {% endif %}
+    {% endfor %}
+</div>
+<h2>Blacklisted Students</h2>
+<div class="container-fluid d-flex flex-wrap">
+    {% for stu in all_students %}
+    {% if stu.status == "blacklisted" %}
+        <div class="card col-3 m-2">
+            <div class="card-body">
+                <h3 align="center">{{ stu.user.name }}</h3>
+                <p>Status: {{ stu.status }}</p>
+                <form method="POST" action="{{ url_for('admin_api.delete_student', student_id=stu.student_id) }}">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin_api.active_student', student_id=stu.student_id) }}">
+                    <button class="btn btn-success btn-sm">Active</button>
+                </form>
+            </div>
+        </div>
+    {% endif %}
     {% endfor %}
 </div>
 <h2>Placement drives</h2>

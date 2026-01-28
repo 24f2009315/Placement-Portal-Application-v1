@@ -78,6 +78,13 @@ def blacklist_student(student_id):
     db.session.commit()
     return redirect(url_for('admin_api.admin_dashboard'))
 
+@api.route("/active_student/<int:student_id>",methods=["POST"])
+def active_student(student_id):
+    student=Student.query.get_or_404(student_id)
+    student.status = "active"
+    db.session.commit()
+    return redirect(url_for('admin_api.admin_dashboard'))
+
 @api.route("/delete_student/<int:student_id>",methods=["POST"])
 @login_required
 def delete_student(student_id):
