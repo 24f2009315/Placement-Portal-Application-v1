@@ -1,0 +1,17 @@
+{% extends "student/layout.html" %}
+{% block body %}
+<h2>{{ company.name }}</h2>
+
+<div class="container-fluid d-flex flex-wrap">
+
+    {% for dri in drives %}
+        <div class="card col-3 m-2">
+            <div class="card-body">
+
+                <h5 class="text-center">{{ dri.name }}</h5>
+                <a href="{{ url_for('student_api.view_drive', drive_id=dri.drive_id) }}" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

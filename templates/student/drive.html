@@ -1,0 +1,34 @@
+{% extends "student/layout.html" %}
+{% block body %}
+
+<h2>{{ company.name }}</h2>
+
+<div class="card col-6 m-3">
+    <div class="card-body">
+
+        <h4>{{ drive.name }}</h4>
+
+        <p>{{ drive.description }}</p>
+
+        <p>
+            <strong>Eligibility:</strong>
+            {{ drive.eligibility }}
+        </p>
+
+        <form method="POST"
+            action="{{ url_for('student_api.apply_drive', drive_id=drive.drive_id) }}">
+            <button type="submit" class="btn btn-success">
+                Apply
+            </button>
+        </form>
+
+
+        <a href="{{ url_for('student_api.view_drives', company_id=company.company_id) }}"
+           class="btn btn-secondary mt-2">
+            Back to Drives
+        </a>
+
+    </div>
+</div>
+
+{% endblock %}

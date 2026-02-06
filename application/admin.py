@@ -1,5 +1,5 @@
 from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for
-from application.models import Users,Company,db,Student,Application,Placement,JobPosition
+from application.models import Users,Company,db,Student,Application,Placement
 from flask_login import login_user,logout_user,login_required,current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -14,12 +14,12 @@ def admin_dashboard():
     all_companies=Company.query.all()
     all_students=Student.query.all()
     all_placements=Placement.query.all()
-    all_jobs=JobPosition.query.all()
+    all_applications = Application.query.all()
     return render_template("admin/dashboard.html",
                                all_companies=all_companies,
                                all_students=all_students,
                                all_placements=all_placements,
-                               all_jobs=all_jobs)
+                               all_applications=all_applications)
 
 @api.route("/search",methods=["GET","POST"])
 def search():
@@ -49,19 +49,6 @@ def reject_company(company_id):
     company.status = "rejected"
     db.session.commit()
     flash("company approved successfully",category="alert-success")
-    return redirect(url_for('admin_api.admin_dashboard'))
-
-@api.route("/delete_company/<int:company_id>",methods=["POST"])
-@login_required
-def delete_company(company_id):
-    company=Company.query.get_or_404(company_id)
-    user=Users.query.get(company.user_id)
-
-    db.session.delete(company)
-    if user:
-        db.session.delete(user)
-    db.session.commit()
-    flash("company deleted successfully",category="alert-success")
     return redirect(url_for('admin_api.admin_dashboard'))
 
 @api.route("/blacklist_company/<int:company_id>",methods=["POST"])
@@ -97,3 +84,21 @@ def delete_student(student_id):
     db.session.commit()
     flash("student deleted successfully",category="alert-success")
     return redirect(url_for('admin_api.admin_dashboard'))
+
+@api.route("/delete_company/<int:company_id>", methods=["POST"])
+@login_required
+def delete_company(company_id):
+    if current_user.role != "admin":
+        flash("Unauthorized action", "danger")
+        return redirect(url_for("auth_api.login"))
+    
+    placement_drive = Placement.query.filter_by(company_id=company.company_id).all()
+    db.session.delete(placement_drive)
+    db.session.commit()
+
+    company = Company.query.filter_by(company_id=company_id).first()
+    db.session.delete(company)
+    db.session.commit()
+
+    flash("Company deleted successfully", "success")
+    return redirect(url_for("admin_api.admin_dashboard"))

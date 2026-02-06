@@ -33,33 +33,17 @@ class Student(db.Model):
     is_placed = db.Column(db.Boolean(), default=False)
     status = db.Column(db.String(20), default="active")  # active / blocked
 
-class JobPosition(db.Model):
-    __tablename__ = "job_position"
-
-    position_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    drive_id = db.Column(db.Integer(),db.ForeignKey("placement.drive_id"),nullable=False)
-    title = db.Column(db.String(100), nullable=False)  # Software Engineer, Data Analyst, ML Intern, etc.
-    job_type = db.Column(db.String(20),nullable=False)  # Internship / Full-time / PPO
-    location = db.Column(db.String(100))
-    vacancies = db.Column(db.Integer())
-    stipend = db.Column(db.Integer())      # for internships
-    ctc = db.Column(db.Float())            # for full-time roles
-    min_cgpa = db.Column(db.Float())
-    eligible_departments = db.Column(db.String(255))
-    eligible_batches = db.Column(db.String(50))
-    description = db.Column(db.Text())
-    status = db.Column(db.String(20),default="Open")  # Open / Closed / Filled
-
 class Placement(db.Model):
     __tablename__ = "placement"
 
     drive_id = db.Column(db.Integer(),primary_key=True,autoincrement=True)
     company_id = db.Column(db.Integer(),db.ForeignKey("company.company_id"),nullable=False)
+    name=db.Column(db.String(50))
     title=db.Column(db.String(50))
     description=db.Column(db.Text())
     eligibility=db.Column(db.String(200))
     deadline=db.Column(db.Date())
-    status=db.Column(db.String(30)) #open/closed
+    status=db.Column(db.String(30),default="open") #open/closed
 
 class Application(db.Model):
     __tablename__ = "application"
@@ -68,8 +52,10 @@ class Application(db.Model):
     student_id = db.Column(db.Integer(), db.ForeignKey("student.student_id"), nullable=False)
     drive_id = db.Column(db.Integer(), db.ForeignKey("placement.drive_id"), nullable=False)
     application_date = db.Column(db.DateTime(), server_default=db.func.now())
-    status = db.Column(db.String(30),default="Applied")  # Applied / Shortlisted / Rejected / Selected
+    status = db.Column(db.String(30),default="applied")  # Applied / Shortlisted / Rejected / Selected
     remarks = db.Column(db.String(255))  # optional admin/HR notes
+
+    student = db.relationship("Student", backref="applications")
 
 class  Company(db.Model):
     __tablename__ = "company"

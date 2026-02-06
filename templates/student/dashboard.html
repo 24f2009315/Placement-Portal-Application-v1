@@ -1,19 +1,62 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    </head>
-    <body>
-        <nav class="navbar bg-body-tertiary">
-            <div class="container-fluid">
-                <a class="navbar-brand">Student</a>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-                    <button class="btn btn-outline-success" type="submit">Search</button>
-                </form>
+{% extends "student/layout.html" %}
+{% block body %}
+<h2>Registered Companies</h2>
+<div class="container-fluid d-flex flex-wrap">
+    {% for com in registered_companies %}
+        <div class="card col-3 m-2">
+            <div class="card-body">
+                <h3 align="center">{{ com.name }}</h3>
+                <a href="{{ url_for('student_api.view_drives',company_id=com.company_id) }}"
+                   class="btn btn-primary btn-sm">
+                    View Drives
+                </a>
             </div>
-        </nav>
-    </body>
-</html>
+        </div>
+        {% else %}
+            <p>No companies available</p>
+    {% endfor %}
+</div>
+<h2>Applied Drives</h2>
+<form action="{{ url_for('company_api.stu_apply',drive_id=drive_id) }}" method="get">
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>Drive ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Degree</th>
+            <th>CGPA</th>
+            <th>Application Date</th>
+            <th>Status</th>
+            <th>Resume</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applied_drives %}
+        <tr>
+            <td>{{ app.student_id }}</td>
+            <td>{{ app.drive_id }}</td>
+            <td>{{ app.student.name }}</td>
+            <td>{{ app.student.phone }}</td>
+            <td>{{ app.student.department }}</td>
+            <td>{{ app.student.degree }}</td>
+            <td>{{ app.student.cgpa }}</td>
+            <td>{{ app.application_date.strftime('%d %b %Y') }}</td>
+            <td>{{ app.status }}</td>
+        <td>
+            <a href="{{ app.student.resume_url }}" target="_blank" class="btn btn-primary">view resume</a>
+        </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="10" class="text-center">
+                No students have applied yet.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</form>
+{% endblock %}

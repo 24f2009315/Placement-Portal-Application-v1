@@ -1,0 +1,106 @@
+{% extends "company/layout.html" %}
+{% block body %}
+
+<h2>Applications</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Degree</th>
+            <th>CGPA</th>
+            <th>Application Date</th>
+            <th>Status</th>
+            <th>Resume</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td>{{ app.student_id }}</td>
+            <td>{{ app.student.name }}</td>
+            <td>{{ app.student.phone }}</td>
+            <td>{{ app.student.department }}</td>
+            <td>{{ app.student.degree }}</td>
+            <td>{{ app.student.cgpa }}</td>
+            <td>{{ app.application_date.strftime('%d %b %Y') }}</td>
+            <td>
+            <form method="POST"
+                  action="{{ url_for('company_api.update_status', application_id=app.application_id) }}">
+                
+                <select name="status" onchange="this.form.submit()">
+                    <option value="applied" {% if app.status=="applied" %}selected{% endif %}>Applied</option>
+                    <option value="shortlisted" {% if app.status=="shortlisted" %}selected{% endif %}>Shortlisted</option>
+                    <option value="rejected" {% if app.status=="rejected" %}selected{% endif %}>Rejected</option>
+                    <option value="selected" {% if app.status=="selected" %}selected{% endif %}>Selected</option>
+                </select>
+
+            </form>
+        </td>
+        <td>
+            <a href="{{ app.student.resume_url }}" target="_blank" class="btn btn-primary">view resume</a>
+        </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="9" class="text-center">
+                No students have applied yet.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Student Applications</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>Drive ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Degree</th>
+            <th>CGPA</th>
+            <th>Application Date</th>
+            <th>Status</th>
+            <th>Resume</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in applications %}
+        {% if app.status == "shortlisted" %}
+        <tr>
+            <td>{{ app.student_id }}</td>
+            <td>{{ app.drive_id }}</td>
+            <td>{{ app.student.name }}</td>
+            <td>{{ app.student.phone }}</td>
+            <td>{{ app.student.department }}</td>
+            <td>{{ app.student.degree }}</td>
+            <td>{{ app.student.cgpa }}</td>
+            <td>{{ app.application_date.strftime('%d %b %Y') }}</td>
+            <td>{{ app.status }}</td>
+        <td>
+            <a href="{{ app.student.resume_url }}" target="_blank" class="btn btn-primary">view resume</a>
+        </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="10" class="text-center">
+                No students have shortlisted yet.
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('company_api.company_dashboard') }}"
+   class="btn btn-secondary">
+    Back
+</a>
+
+{% endblock %}

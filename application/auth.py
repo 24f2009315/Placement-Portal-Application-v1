@@ -41,10 +41,10 @@ def login():
         flash("Login Successful",category="success")
 
         if user.role == "student":
-            return render_template("student_api.student_dashboard")
+            return redirect(url_for("student_api.student_dashboard"))
         elif user.role == "company":
             if company.status == "approved":
-                return render_template("company_api.company_dashboard")
+                return redirect(url_for("company_api.company_dashboard"))
             else:
                 return redirect(url_for("auth_api.login"))
         return redirect(url_for("admin_api.admin_dashboard"))

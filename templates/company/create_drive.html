@@ -1,0 +1,30 @@
+{% extends "company/layout.html" %}
+{% block body %}
+<div class="login-form">
+    <form action="{{ url_for('company_api.create_drive') }}" method="post">
+      <h3>Create Drive</h3>
+      <div class="mb-3">
+        <label class="form-label">Drive name</label>
+        <input type="text" class="form-control" name="name" placeholder="Enter drive name" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Job Title</label>
+        <input type="text" class="form-control" name="title" placeholder="Enter job title" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Job Description</label>
+        <input type="text" class="form-control" name="description" placeholder="Enter job description" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Eligibility Criteria</label>
+        <input type="text" class="form-control" name="eligibility" placeholder="Enter eligibility criteria" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Application Deadline</label>
+        <input type="date" class="form-control" name="deadline" placeholder="Enter deadline" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Create Drive</button>
+    </form><br>
+    <a href="{{ url_for('company_api.company_dashboard') }}"><button type="submit" class="btn btn-primary">Back</button></a>
+</div>
+{% endblock %}

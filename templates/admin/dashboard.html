@@ -52,54 +52,6 @@
     {% endif %}
     {% endfor %}
 </div>
-<h2>Blacklisted Companies</h2>
-<div class="container-fluid d-flex flex-wrap">
-    {% for com in all_companies %}
-    {% if com.status == "blacklisted" %}
-        <div class="card col-3 m-2">
-            <div class="card-body">
-                <h3 align="center">{{ com.user.name }}</h3>
-                <p>Status: {{ com.status }}</p>
-                <form method="POST" action="{{ url_for('admin_api.delete_company', company_id=com.company_id) }}">
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
-
-                <form method="POST" action="{{ url_for('admin_api.approve_company', company_id=com.company_id) }}">
-                    <button class="btn btn-success btn-sm">Approve</button>
-                </form>
-
-                <form method="POST" action="{{ url_for('admin_api.reject_company', company_id=com.company_id) }}">
-                    <button class="btn btn-warning btn-sm">Reject</button>
-                </form>
-            </div>
-        </div>
-    {% endif %}
-    {% endfor %}
-</div>
-<h2>Rejected Companies</h2>
-<div class="container-fluid d-flex flex-wrap">
-    {% for com in all_companies %}
-    {% if com.status == "rejected" %}
-        <div class="card col-3 m-2">
-            <div class="card-body">
-                <h3 align="center">{{ com.user.name }}</h3>
-                <p>Status: {{ com.status }}</p>
-                <form method="POST" action="{{ url_for('admin_api.delete_company', company_id=com.company_id) }}">
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
-
-                <form method="POST" action="{{ url_for('admin_api.approve_company', company_id=com.company_id) }}">
-                    <button class="btn btn-success btn-sm">Approve</button>
-                </form>
-
-                <form method="POST" action="{{ url_for('admin_api.blacklist_company', company_id=com.company_id) }}">
-                    <button class="btn btn-dark btn-sm">Blacklist</button>
-                </form>
-            </div>
-        </div>
-    {% endif %}
-    {% endfor %}
-</div>
 <h2>Registered Students</h2>
 <div class="container-fluid d-flex flex-wrap">
     {% for stu in all_students %}
@@ -120,54 +72,66 @@
     {% endif %}
     {% endfor %}
 </div>
-<h2>Blacklisted Students</h2>
-<div class="container-fluid d-flex flex-wrap">
-    {% for stu in all_students %}
-    {% if stu.status == "blacklisted" %}
-        <div class="card col-3 m-2">
-            <div class="card-body">
-                <h3 align="center">{{ stu.user.name }}</h3>
-                <p>Status: {{ stu.status }}</p>
-                <form method="POST" action="{{ url_for('admin_api.delete_student', student_id=stu.student_id) }}">
-                    <button class="btn btn-danger btn-sm">Delete</button>
-                </form>
+<h2>Placement Drives</h2>
+{% for company in all_companies %}
+<h2>{{ company.name }}</h2>
+{% endfor %}
 
-                <form method="POST" action="{{ url_for('admin_api.active_student', student_id=stu.student_id) }}">
-                    <button class="btn btn-success btn-sm">Active</button>
-                </form>
-            </div>
-        </div>
-    {% endif %}
-    {% endfor %}
+<div class="card col-6 m-3">
+    <div class="card-body">
+        {% for drive in all_placements %}
+        {% if drive.status == "open" %}
+        <h4>{{ drive.name }}</h4>
+
+        <p>{{ drive.description }}</p>
+
+        <p>
+            <strong>Eligibility:</strong>
+            {{ drive.eligibility }}
+        </p>
+        {% endif %}
+        {% endfor %}
+    </div>
 </div>
-<h2>Placement drives</h2>
-<div class="container-fluid d-flex flex-wrap">
-    {% for pla in all_placements %}
-        <div class="card col-3 m-2">
-            <div class="card-body">
-                <h3 align="center">{{ pla.title }}</h3>
-                <p>Status: {{ pla.status }}</p>
-                <a href="#" class="btn btn-danger">Delete</a>
-                <a href="#" class="btn btn-success">Approve</a>
-                <a href="#" class="btn btn-warning">Reject</a>
-                <a href="#" class="btn btn-dark">Blacklist</a>
-            </div>
-        </div>
-    {% endfor %}
-</div>
-<h2>Job Applications</h2>
-<div class="container-fluid d-flex flex-wrap">
-    {% for job in all_jobs %}
-        <div class="card col-3 m-2">
-            <div class="card-body">
-                <h3 align="center">{{ job.title }}</h3>
-                <p>Status: {{ job.status }}</p>
-                <a href="#" class="btn btn-danger">Delete</a>
-                <a href="#" class="btn btn-success">Approve</a>
-                <a href="#" class="btn btn-warning">Reject</a>
-                <a href="#" class="btn btn-dark">Blacklist</a>
-            </div>
-        </div>
-    {% endfor %}
-</div>
+<h2>Student Applications</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Student ID</th>
+            <th>Drive ID</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Department</th>
+            <th>Degree</th>
+            <th>CGPA</th>
+            <th>Application Date</th>
+            <th>Status</th>
+            <th>Resume</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for app in all_applications %}
+        <tr>
+            <td>{{ app.student_id }}</td>
+            <td>{{ app.drive_id }}</td>
+            <td>{{ app.student.name }}</td>
+            <td>{{ app.student.phone }}</td>
+            <td>{{ app.student.department }}</td>
+            <td>{{ app.student.degree }}</td>
+            <td>{{ app.student.cgpa }}</td>
+            <td>{{ app.application_date.strftime('%d %b %Y') }}</td>
+            <td>{{ app.status }}</td>
+        <td>
+            <a href="{{ app.student.resume_url }}" target="_blank" class="btn btn-primary">view resume</a>
+        </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="10" class="text-center">
+                No students have applied yet.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
