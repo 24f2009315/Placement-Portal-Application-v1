@@ -8,9 +8,25 @@ api = Blueprint("company_api",__name__)
 
 @api.route("/company/company_dashboard",methods=["GET"])
 def company_dashboard():
+    company = Company.query.filter_by(user_id=current_user.user_id).first()
     upcoming_drives = Placement.query.filter_by(status="open").all()
     past_drives = Placement.query.filter_by(status="closed").all()
-    return render_template("company/dashboard.html",upcoming_drives=upcoming_drives,past_drives=past_drives)
+    all_company_drives = Placement.query.filter_by(company_id=company.company_id).all()
+    trend_labels = []
+    trend_values = []
+
+    for drive in all_company_drives:
+        trend_labels.append(drive.name or f"Drive {drive.drive_id}")
+        trend_values.append(Application.query.filter_by(drive_id=drive.drive_id).count())
+
+    company_chart_data = {
+        "labels": trend_labels,
+        "values": trend_values
+    }
+    return render_template("company/dashboard.html",
+                           upcoming_drives=upcoming_drives,
+                           past_drives=past_drives,
+                           company_chart_data = company_chart_data)
 
 @api.route("/company/create_drive",methods=["GET","POST"])
 def create_drive():

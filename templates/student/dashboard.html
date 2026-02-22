@@ -1,5 +1,35 @@
 {% extends "student/layout.html" %}
 {% block body %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="mb-3">My Application Status Distribution</h4>
+        <canvas id="studentStatusChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const studentStatusPayload = {{ student_chart_data | tojson }};
+    const studentCtx = document.getElementById("studentStatusChart");
+
+    if (studentCtx) {
+        new Chart(studentCtx, {
+            type: "doughnut",
+            data: {
+                labels: studentStatusPayload.labels,
+                datasets: [{
+                    data: studentStatusPayload.values,
+                    backgroundColor: ["#0d6efd", "#20c997", "#dc3545", "#ffc107", "#6f42c1"]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+    }
+</script>
 <h2>Registered Companies</h2>
 <div class="container-fluid d-flex flex-wrap">
     {% for com in registered_companies %}

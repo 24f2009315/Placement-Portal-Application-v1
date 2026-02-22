@@ -14,7 +14,19 @@ def student_dashboard():
     registered_companies = Company.query.filter_by(status="approved").all()
     student = Student.query.filter_by(user_id = current_user.user_id).first()
     applied_drives = Application.query.filter_by(student_id = student.student_id).all()
-    return render_template("student/dashboard.html",registered_companies=registered_companies,applied_drives=applied_drives)
+    status_counts = {}
+    for app in applied_drives:
+        status = (app.status or "applied").capitalize()
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+    student_chart_data = {
+        "labels": list(status_counts.keys()),
+        "values": list(status_counts.values())
+    }
+    return render_template("student/dashboard.html",
+                           registered_companies=registered_companies,
+                           applied_drives=applied_drives,
+                           student_chart_data=student_chart_data)
 
 @api.route("/student/view_drives/<int:company_id>",methods=["GET"])
 def view_drives(company_id):

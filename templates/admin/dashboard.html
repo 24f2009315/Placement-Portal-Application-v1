@@ -1,5 +1,37 @@
 {% extends "admin/layout.html" %}
 {% block body %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="mb-3">Platform Overview</h4>
+        <canvas id="adminOverviewChart"></canvas>
+    </div>
+</div>
+
+<script>
+    const adminChartPayload = {{ admin_chart_data | tojson }};
+    const adminCtx = document.getElementById("adminOverviewChart");
+
+    if (adminCtx) {
+        new Chart(adminCtx, {
+            type: "bar",
+            data: {
+                labels: adminChartPayload.labels,
+                datasets: [{
+                    label: "Count",
+                    data: adminChartPayload.values,
+                    backgroundColor: ["#0d6efd", "#20c997", "#ffc107"],
+                    borderColor: ["#0a58ca", "#198754", "#ffca2c"],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    }
+</script>
 <h2>Registered Companies</h2>
 <div class="container-fluid d-flex flex-wrap">
     {% for com in all_companies %}
