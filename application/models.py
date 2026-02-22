@@ -45,6 +45,8 @@ class Placement(db.Model):
     deadline=db.Column(db.Date())
     status=db.Column(db.String(30),default="open") #open/closed
 
+    company = db.relationship("Company",backref="placement")
+
 class Application(db.Model):
     __tablename__ = "application"
 
@@ -56,11 +58,12 @@ class Application(db.Model):
     remarks = db.Column(db.String(255))  # optional admin/HR notes
 
     student = db.relationship("Student", backref="applications")
+    placement = db.relationship("Placement",backref="applications")
 
 class  Company(db.Model):
     __tablename__ = "company"
 
-    user = db.relationship("Users", backref="company", lazy=True)
+    user = db.relationship("Users", backref="company", uselist = False)
     name = db.Column(db.String(150), nullable=False)
     company_id = db.Column(db.Integer(),primary_key=True,autoincrement=True)
     user_id = db.Column(db.Integer(),db.ForeignKey("users.user_id"),nullable=False,unique=True)

@@ -4,6 +4,8 @@ from application.auth import api as auth_api
 from application.admin import api as admin_api
 from application.company import api as company_api
 from application.student import api as student_api
+from application.drives import api as drive_api
+from application.applications import api as application_api
 from werkzeug.security import generate_password_hash
 from flask_login import LoginManager
 
@@ -25,10 +27,12 @@ def create_app():
             admin=Users(name="Vaishnavi",username="vaishnavi",password=generate_password_hash("vaishnavi",method="pbkdf2:sha256"),role="admin",is_active=True)
             db.session.add(admin)
             db.session.commit()
-    app.register_blueprint(auth_api)
-    app.register_blueprint(admin_api)
-    app.register_blueprint(company_api)
-    app.register_blueprint(student_api)
+    app.register_blueprint(auth_api,url_prefix="/")
+    app.register_blueprint(admin_api,url_prefix="/admin")
+    app.register_blueprint(company_api,url_prefix="/company")
+    app.register_blueprint(student_api,url_prefix="/student")
+    app.register_blueprint(drive_api,url_prefix="/drive")
+    app.register_blueprint(application_api,url_prefix="/application")
 
     @login_manager.user_loader
     def load_user(user_id):

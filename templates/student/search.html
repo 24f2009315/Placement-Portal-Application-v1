@@ -1,0 +1,19 @@
+{% extends "student/layout.html" %}
+
+{% block body %}
+<div class="container mt-4">
+    <h3 class="mb-3">Search Results for "{{ request.args.get("query") }}"</h3>
+
+    <div class="card mb-3">
+        <div class="card-header">Companies</div>
+        <ul class="list-group list-group-flush">
+            {% for comp in companies %}
+                <li class="list-group-item">{{ comp.name }}</li>
+            {% else %}
+                <li class="list-group-item">No companies found</li>
+            {% endfor %}
+        </ul>
+    </div><br>
+    <a href="{{ url_for('student_api.student_dashboard') }}" class="btn btn-warning">Go Back</a>
+</div>
+{% endblock %}

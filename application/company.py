@@ -1,4 +1,4 @@
-from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for
+from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for,jsonify
 from application.models import Users,Company,db,Student,Placement,Application
 from flask_login import login_user,logout_user,login_required,current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,13 +6,13 @@ from datetime import datetime
 
 api = Blueprint("company_api",__name__)
 
-@api.route("/company_dashboard",methods=["GET"])
+@api.route("/company/company_dashboard",methods=["GET"])
 def company_dashboard():
     upcoming_drives = Placement.query.filter_by(status="open").all()
     past_drives = Placement.query.filter_by(status="closed").all()
     return render_template("company/dashboard.html",upcoming_drives=upcoming_drives,past_drives=past_drives)
 
-@api.route("/create_drive",methods=["GET","POST"])
+@api.route("/company/create_drive",methods=["GET","POST"])
 def create_drive():
 
     if current_user.role != "company":
@@ -37,7 +37,7 @@ def create_drive():
 
     return redirect(url_for("company_api.company_dashboard"))
     
-@api.route("/mark_complete/<int:drive_id>",methods=["POST"])
+@api.route("/company/mark_complete/<int:drive_id>",methods=["POST"])
 def mark_complete(drive_id):
     drive = Placement.query.filter_by(drive_id=drive_id).first()
 
@@ -45,14 +45,94 @@ def mark_complete(drive_id):
     db.session.commit()
     return redirect(url_for("company_api.company_dashboard"))
 
-@api.route("/stu_apply/<int:drive_id>",methods=["GET"])
+@api.route("/company/stu_apply/<int:drive_id>",methods=["GET"])
 def stu_apply(drive_id):
     applications = Application.query.filter_by(drive_id=drive_id).all()
     return render_template("company/stu_apply.html",applications=applications,drive_id=drive_id)
 
-@api.route("/update_status/<int:application_id>", methods=["POST"])
+@api.route("/company/update_status/<int:application_id>", methods=["POST"])
 def update_status(application_id):
     application = Application.query.get(application_id)
     application.status = request.form.get("status")
     db.session.commit()
     return redirect(url_for('company_api.stu_apply',drive_id=application.drive_id))
+
+@api.route('/api/companies', methods=['GET'])
+def get_companies_api():
+    companies = Company.query.all()
+    result = []
+    for _ in companies:
+        result.append({
+            "company_id":_.company_id,
+            "name":_.name
+        })
+    return jsonify(result)
+
+@api.route('/api/companies', methods=['POST'])
+def create_company_api():
+    data = request.get_json()
+
+    if not data or not data.get("name") or not data.get("username") or not data.get("password"):
+        return jsonify({"error": "invalid input"}), 400
+
+    new_user = Users(
+        name=data.get("name"),
+        username=data.get("username"),
+        password=data.get("password"),
+        role="company",
+        is_active=True
+    )
+    db.session.add(new_user)
+    db.session.commit()
+
+    new_company = Company(
+        name=data.get("name"),
+        user_id=new_user.user_id,
+        website = data.get("website")
+    )
+    db.session.add(new_company)
+    db.session.commit()
+
+    return jsonify({
+        "message": "company created",
+        "company_id": new_company.company_id,
+        "user_id": new_user.user_id
+    }), 201
+
+@api.route('/api/companies/<int:company_id>', methods=['PUT'])
+def update_company_api(company_id):
+    data = request.get_json()
+
+    company = Company.query.get(company_id)
+
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    if data.get("name"):
+        company.user.name = data.get("name")
+
+    if data.get("hr_contact"):
+        company.hr_contact = data.get("hr_contact")
+
+    if data.get("website"):
+        company.website = data.get("website")
+
+    db.session.commit()
+
+    return jsonify({"message": "Company updated successfully"})
+
+@api.route('/api/companies/<int:company_id>', methods=['DELETE'])
+def delete_company_api(company_id):
+
+    company = Company.query.get(company_id)
+
+    if not company:
+        return jsonify({"error": "Company not found"}), 404
+
+    user = company.user
+
+    db.session.delete(company)
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"message": "Company deleted successfully"})
