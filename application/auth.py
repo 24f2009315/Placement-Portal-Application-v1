@@ -54,16 +54,43 @@ def company_signup():
     if request.method == "GET":
         return render_template("company/signup.html")
     if request.method == "POST":
-        name = request.form.get("name")
-        username = request.form.get("username")
-        password = request.form.get("password")
-        hr_contact = request.form.get("hr_contact")
-        website = request.form.get("website")
+        name = request.form.get("name","").strip()
+        username = request.form.get("username","").strip()
+        password = request.form.get("password","")
+        confirm_password = request.form.get("confirm_password", "")
+        hr_contact = request.form.get("hr_contact","").strip()
+        website = request.form.get("website","").strip()
 
-        company=Users.query.filter_by(username=username).first()
+        errors=[]
 
-        if company:
+        # Required checks
+        if not name or len(name) < 3:
+            errors.append("Company name must be at least 3 characters.")
+
+        if not username or not username.replace("_", "").isalnum():
+            errors.append("Invalid username format.")
+
+        if len(password) < 8:
+            errors.append("Password must be at least 8 characters.")
+
+        if password != confirm_password:
+            errors.append("Passwords do not match.")
+
+        if not hr_contact.isdigit() or len(hr_contact) != 10:
+            errors.append("HR contact must be 10 digits.")
+
+        if not website.startswith("http"):
+            errors.append("Website must start with http or https.")
+
+        existing_company=Users.query.filter_by(username=username).first()
+
+        if existing_company:
             flash("username already taken",category="inavlid-email")
+            return redirect(url_for("auth_api.company_signup"))
+        
+        if errors:
+            for error in errors:
+                flash(error,category="warning")
             return redirect(url_for("auth_api.company_signup"))
         
         if not name or not username:
@@ -87,22 +114,72 @@ def student_signup():
         selected_degree=request.args.get("degree")
         return render_template("student/signup.html",selected_degree=selected_degree)
     if request.method == "POST":
-        name = request.form.get("name")
-        username = request.form.get("username")
-        password = request.form.get("password")
-        roll_no = request.form.get("roll_no")
-        phone = request.form.get("phone")
-        department = request.form.get("department")
-        degree = request.form.get("degree")
-        batch_year = request.form.get("batch_year")
-        cgpa = request.form.get("cgpa")
-        resume_url = request.form.get("resume_url")
+        name = request.form.get("name","").strip()
+        username = request.form.get("username","").strip()
+        password = request.form.get("password","")
+        confirm_password = request.form.get("confirm_password", "")
+        roll_no = request.form.get("roll_no","").strip()
+        phone = request.form.get("phone","").strip()
+        department = request.form.get("department","")
+        degree = request.form.get("degree","")
+        batch_year = request.form.get("batch_year","")
+        cgpa = request.form.get("cgpa","")
+        resume_url = request.form.get("resume_url","").strip()
+
+        errors=[]
+
+        # Name
+        if len(name) < 3:
+            errors.append("Name must be at least 3 characters.")
+
+        # Username
+        if not username.replace("_", "").isalnum():
+            errors.append("Invalid username.")
+
+        # Password
+        if len(password) < 8:
+            errors.append("Password too short.")
+
+        if password != confirm_password:
+            errors.append("Passwords do not match.")
+
+        # Roll number
+        if not roll_no:
+            errors.append("Roll number required.")
+
+        # Phone
+        if not phone.isdigit() or len(phone) != 10:
+            errors.append("Phone must be 10 digits.")
+
+        # Batch year
+        try:
+            batch_year = int(batch_year)
+            if batch_year < 2015 or batch_year > 2035:
+                errors.append("Invalid batch year.")
+        except:
+            errors.append("Batch year must be numeric.")
+
+        # CGPA
+        try:
+            cgpa = float(cgpa)
+            if cgpa < 0 or cgpa > 10:
+                errors.append("CGPA must be between 0 and 10.")
+        except:
+            errors.append("Invalid CGPA.")
+
+        # Resume
+        if not resume_url.startswith("http"):
+            errors.append("Resume URL must start with http or https.")
 
         student=Users.query.filter_by(username=username).first()
 
         if student:
-            flash("username already taken",category="inavlid-email")
+            flash("username already taken",category="warning")
             return redirect(url_for("auth_api.student_signup"))
+        
+        if errors:
+            for error in errors:
+                flash(error,category="warning")
         
         if not name or not username:
             flash("both name and username are reuqired",category="warning")
