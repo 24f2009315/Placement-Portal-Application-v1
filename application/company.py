@@ -1,4 +1,5 @@
 from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for,jsonify
+from application.authz import role_required
 from application.models import Users,Company,db,Student,Placement,Application
 from flask_login import login_user,logout_user,login_required,current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +8,8 @@ from datetime import datetime
 api = Blueprint("company_api",__name__)
 
 @api.route("/company/company_dashboard",methods=["GET"])
+@login_required
+@role_required("company")
 def company_dashboard():
     company = Company.query.filter_by(user_id=current_user.user_id).first()
     upcoming_drives = Placement.query.filter_by(status="open").all()
@@ -29,12 +32,9 @@ def company_dashboard():
                            company_chart_data = company_chart_data)
 
 @api.route("/company/create_drive",methods=["GET","POST"])
+@login_required
+@role_required("company")
 def create_drive():
-
-    if current_user.role != "company":
-        flash("Only companies can create placement drives", "danger")
-        return redirect(url_for("auth_api.login"))
-    
     if request.method == "GET":
         return render_template("company/create_drive.html")
     
@@ -54,6 +54,8 @@ def create_drive():
     return redirect(url_for("company_api.company_dashboard"))
     
 @api.route("/company/mark_complete/<int:drive_id>",methods=["POST"])
+@login_required
+@role_required("company")
 def mark_complete(drive_id):
     drive = Placement.query.filter_by(drive_id=drive_id).first()
 
@@ -62,11 +64,15 @@ def mark_complete(drive_id):
     return redirect(url_for("company_api.company_dashboard"))
 
 @api.route("/company/stu_apply/<int:drive_id>",methods=["GET"])
+@login_required
+@role_required("company")
 def stu_apply(drive_id):
     applications = Application.query.filter_by(drive_id=drive_id).all()
     return render_template("company/stu_apply.html",applications=applications,drive_id=drive_id)
 
 @api.route("/company/update_status/<int:application_id>", methods=["POST"])
+@login_required
+@role_required("company")
 def update_status(application_id):
     application = Application.query.get(application_id)
     application.status = request.form.get("status")

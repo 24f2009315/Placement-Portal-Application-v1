@@ -180,6 +180,7 @@ def student_signup():
         if errors:
             for error in errors:
                 flash(error,category="warning")
+            return redirect(url_for("auth_api.student_signup",degree=degree))
         
         if not name or not username:
             flash("both name and username are reuqired",category="warning")
@@ -195,3 +196,10 @@ def student_signup():
 
         flash("Registration Successful",category="success")
         return render_template("index.html")
+    
+@api.route("/logout",methods=["POST"])
+@login_required
+def logout():
+    logout_user()
+    flash("User logged out successfully",category="success")
+    return redirect(url_for("auth_api.login"))

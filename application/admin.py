@@ -1,4 +1,5 @@
 from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for
+from application.authz import role_required
 from application.models import Users,Company,db,Student,Application,Placement
 from flask_login import login_user,logout_user,login_required,current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,10 +8,8 @@ api = Blueprint("admin_api",__name__)
 
 @api.route("/admin/admin_dashboard",methods=["GET"])
 @login_required
+@role_required("admin")
 def admin_dashboard():
-    if current_user.role != "admin":
-        return redirect(url_for("auth_api.login"))
-    
     all_companies=Company.query.all()
     all_students=Student.query.all()
     all_placements=Placement.query.all()
@@ -31,6 +30,7 @@ def admin_dashboard():
                                admin_chart_data = admin_chart_data)
 
 @api.route("/admin/search",methods=["GET","POST"])
+@role_required("admin")
 def search():
     query=request.args.get("query","").strip()
     companies=[]
@@ -45,6 +45,8 @@ def search():
     return render_template("admin/search.html",companies=companies,students=students)
 
 @api.route("/admin/approve_company/<int:company_id>",methods=["POST"])
+@login_required
+@role_required("admin")
 def approve_company(company_id):
     company=Company.query.get_or_404(company_id)
     company.status = "approved"
@@ -53,6 +55,8 @@ def approve_company(company_id):
     return redirect(url_for('admin_api.admin_dashboard'))
 
 @api.route("/admin/reject_company/<int:company_id>",methods=["POST"])
+@login_required
+@role_required("admin")
 def reject_company(company_id):
     company=Company.query.get_or_404(company_id)
     company.status = "rejected"
@@ -61,6 +65,8 @@ def reject_company(company_id):
     return redirect(url_for('admin_api.admin_dashboard'))
 
 @api.route("/admin/blacklist_company/<int:company_id>",methods=["POST"])
+@login_required
+@role_required("admin")
 def blacklist_company(company_id):
     company=Company.query.get_or_404(company_id)
     company.status = "blacklisted"
@@ -68,6 +74,8 @@ def blacklist_company(company_id):
     return redirect(url_for('admin_api.admin_dashboard'))
 
 @api.route("/admin/blacklist_student/<int:student_id>",methods=["POST"])
+@login_required
+@role_required("admin")
 def blacklist_student(student_id):
     student=Student.query.get_or_404(student_id)
     student.status = "blacklisted"
@@ -75,6 +83,8 @@ def blacklist_student(student_id):
     return redirect(url_for('admin_api.admin_dashboard'))
 
 @api.route("/admin/active_student/<int:student_id>",methods=["POST"])
+@login_required
+@role_required("admin")
 def active_student(student_id):
     student=Student.query.get_or_404(student_id)
     student.status = "active"
@@ -83,6 +93,7 @@ def active_student(student_id):
 
 @api.route("/admin/delete_student/<int:student_id>",methods=["POST"])
 @login_required
+@role_required("admin")
 def delete_student(student_id):
     student=Student.query.get_or_404(student_id)
     user=Users.query.get(student.user_id)
@@ -96,18 +107,24 @@ def delete_student(student_id):
 
 @api.route("/admin/delete_company/<int:company_id>", methods=["POST"])
 @login_required
+@role_required("admin")
 def delete_company(company_id):
-    if current_user.role != "admin":
-        flash("Unauthorized action", "danger")
-        return redirect(url_for("auth_api.login"))
-    
-    placement_drive = Placement.query.filter_by(company_id=company.company_id).all()
-    db.session.delete(placement_drive)
-    db.session.commit()
+    company = Company.query.filter_by(company_id=company_id).first_or_404()
+    user = Users.query.get(company.user_id)
 
-    company = Company.query.filter_by(company_id=company_id).first()
+    drives = Placement.query.filter_by(company_id=company.company_id).all()
+    drive_ids = [d.drive_id for d in drives]
+
+    if drive_ids:
+        Application.query.filter(Application.drive_id.in_(drive_ids)).delete(synchronize_session=False)
+
+    for drive in drives:
+        db.session.delete(drive)
+
     db.session.delete(company)
-    db.session.commit()
+    if user:
+        db.session.delete(user)
 
+    db.session.commit()
     flash("Company deleted successfully", "success")
     return redirect(url_for("admin_api.admin_dashboard"))
