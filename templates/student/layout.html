@@ -37,6 +37,9 @@
                             <a class="nav-link disabled" aria-disabled="true">Disabled</a>
                         </li>
                     </ul>
+                    <a href="{{ url_for('student_api.update_profile') }}" class="btn btn-warning">
+                            Update Profile
+                    </a>
                     <a href="/" class="btn btn-primary">Logout</a>
                     <form class="d-flex" role="search" method="GET" action="{{ url_for('student_api.search') }}">
                         <input class="form-control me-2" type="search" name="query" placeholder="Search" required>

@@ -76,6 +76,51 @@ def search():
         ).all()
     return render_template("student/search.html",companies=companies)
 
+@api.route("/profile/update", methods=["GET", "POST"])
+@login_required
+@role_required("student")
+def update_profile():
+    student = Student.query.filter_by(user_id=current_user.user_id).first()
+
+    if request.method == "GET":
+        return render_template("student/update_profile.html", student=student)
+
+    if request.method == "POST":
+
+        phone = request.form.get("phone", "").strip()
+        cgpa = request.form.get("cgpa", "")
+        resume_url = request.form.get("resume_url", "").strip()
+
+        errors = []
+
+        if not phone.isdigit() or len(phone) != 10:
+            errors.append("Invalid phone number.")
+
+        try:
+            cgpa = float(cgpa)
+            if cgpa < 0 or cgpa > 10:
+                errors.append("CGPA must be between 0 and 10.")
+        except:
+            errors.append("Invalid CGPA.")
+
+        if not resume_url.startswith("http"):
+            errors.append("Invalid resume URL.")
+
+        if errors:
+            for error in errors:
+                flash(error, "warning")
+            return redirect(url_for("student_api.update_profile"))
+
+        # Safe update
+        student.phone = phone
+        student.cgpa = cgpa
+        student.resume_url = resume_url
+
+        db.session.commit()
+
+        flash("Profile updated successfully", "success")
+        return redirect(url_for("student_api.student_dashboard"))
+
 @api.route('/api/students', methods=['GET'])
 def get_students_api():
     students = Student.query.all()
