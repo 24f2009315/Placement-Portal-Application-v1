@@ -12,7 +12,9 @@
 <div class="card mb-4">
     <div class="card-body">
         <h4 class="mb-3">Application Trends by Job Posting</h4>
-        <canvas id="companyTrendChart"></canvas>
+        <div style="height: 260px;">
+            <canvas id="companyTrendChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -36,6 +38,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
             }
         });

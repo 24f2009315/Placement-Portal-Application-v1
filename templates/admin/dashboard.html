@@ -38,7 +38,9 @@
 <div class="card mb-4">
     <div class="card-body">
         <h4 class="mb-3">Platform Overview</h4>
-        <canvas id="adminOverviewChart"></canvas>
+        <div style="height: 260px;">
+            <canvas id="adminOverviewChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -61,6 +63,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
             }

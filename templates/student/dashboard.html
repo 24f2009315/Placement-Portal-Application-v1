@@ -3,7 +3,9 @@
 <div class="card mb-4">
     <div class="card-body">
         <h4 class="mb-3">My Application Status Distribution</h4>
-        <canvas id="studentStatusChart"></canvas>
+        <div style="height: 260px;">
+            <canvas id="studentStatusChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -23,6 +25,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { position: "bottom" }
                 }
