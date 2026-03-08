@@ -1,19 +1,36 @@
-from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for,jsonify
-from application.authz import role_required
-from application.models import Users,Company,db,Student,Placement,Application
-from flask_login import login_user,logout_user,login_required,current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from application.models import Application, Company, Placement, Users, db
+from flask_login import current_user, login_required
 from datetime import datetime
 
 api = Blueprint("company_api",__name__)
 
-@api.route("/company/company_dashboard",methods=["GET"])
+@api.before_request
 @login_required
-@role_required("company")
+def require_company():
+    if current_user.role != "company":
+        return "Access Denied", 403
+
+@api.route("/company/company_dashboard",methods=["GET"])
 def company_dashboard():
     company = Company.query.filter_by(user_id=current_user.user_id).first()
-    upcoming_drives = Placement.query.filter_by(status="open").all()
-    past_drives = Placement.query.filter_by(status="closed").all()
+    approved_drives = Placement.query.filter(
+        Placement.company_id == company.company_id,
+        Placement.status.ilike("approved"),
+    ).all()
+    closed_drives = Placement.query.filter(
+        Placement.company_id == company.company_id,
+        Placement.status.ilike("closed"),
+    ).all()
+    pending_drives = Placement.query.filter(
+        Placement.company_id == company.company_id,
+        Placement.status.in_(["pending", "open"]),
+    ).all()
+    rejected_drives = Placement.query.filter(
+        Placement.company_id == company.company_id,
+        Placement.status.ilike("rejected"),
+    ).all()
+
     all_company_drives = Placement.query.filter_by(company_id=company.company_id).all()
     trend_labels = []
     trend_values = []
@@ -27,13 +44,29 @@ def company_dashboard():
         "values": trend_values
     }
     return render_template("company/dashboard.html",
-                           upcoming_drives=upcoming_drives,
-                           past_drives=past_drives,
+                           approved_drives=approved_drives,
+                           closed_drives=closed_drives,
+                           pending_drives=pending_drives,
+                           rejected_drives=rejected_drives,
                            company_chart_data = company_chart_data)
 
+@api.route("/company/shortlisted_candidates", methods=["GET"])
+def shortlisted_candidates():
+    company = Company.query.filter_by(user_id=current_user.user_id).first()
+    shortlisted_applications = (
+        Application.query.join(Placement, Application.drive_id == Placement.drive_id)
+        .filter(
+            Placement.company_id == company.company_id,
+            Application.status.ilike("shortlisted"),
+        )
+        .all()
+    )
+    return render_template(
+        "company/shortlisted_candidates.html",
+        shortlisted_applications=shortlisted_applications,
+    )
+
 @api.route("/company/create_drive",methods=["GET","POST"])
-@login_required
-@role_required("company")
 def create_drive():
     if request.method == "GET":
         return render_template("company/create_drive.html")
@@ -42,40 +75,53 @@ def create_drive():
     title = request.form.get("title")
     description = request.form.get("description")
     eligibility = request.form.get("eligibility")
-    deadline_str = request.form.get("deadline")   # "2026-02-07"
-    deadline = datetime.strptime(deadline_str, "%Y-%m-%d").date()
+    deadline_str = request.form.get("deadline","").strip()
+    try:
+        deadline = datetime.strptime(deadline_str, "%Y-%m-%d").date()
+    except ValueError:
+        flash("Invalid deadline. Use YYYY-MM-DD.", "warning")
+        return redirect(url_for("company_api.create_drive"))
 
     company = Company.query.filter_by(user_id=current_user.user_id).first()
 
-    new_placement = Placement(name=name,title=title,description=description,eligibility=eligibility,deadline=deadline,company_id=company.company_id,status="open")
+    new_placement = Placement(name=name,title=title,description=description,eligibility=eligibility,deadline=deadline,company_id=company.company_id,status="pending")
     db.session.add(new_placement)
     db.session.commit()
 
     return redirect(url_for("company_api.company_dashboard"))
     
 @api.route("/company/mark_complete/<int:drive_id>",methods=["POST"])
-@login_required
-@role_required("company")
 def mark_complete(drive_id):
-    drive = Placement.query.filter_by(drive_id=drive_id).first()
+    company = Company.query.filter_by(user_id=current_user.user_id).first()
+    drive = Placement.query.filter_by(drive_id=drive_id, company_id=company.company_id).first()
+    if not drive:
+        flash("Drive not found.", "warning")
+        return redirect(url_for("company_api.company_dashboard"))
+
+    if (drive.status or "").lower() != "approved":
+        flash("Only approved drives can be closed.", "warning")
+        return redirect(url_for("company_api.company_dashboard"))
 
     drive.status = "closed"
     db.session.commit()
     return redirect(url_for("company_api.company_dashboard"))
 
 @api.route("/company/stu_apply/<int:drive_id>",methods=["GET"])
-@login_required
-@role_required("company")
 def stu_apply(drive_id):
     applications = Application.query.filter_by(drive_id=drive_id).all()
     return render_template("company/stu_apply.html",applications=applications,drive_id=drive_id)
 
 @api.route("/company/update_status/<int:application_id>", methods=["POST"])
-@login_required
-@role_required("company")
 def update_status(application_id):
     application = Application.query.get(application_id)
-    application.status = request.form.get("status")
+    if not application:
+        flash("Application not found.", "warning")
+        return redirect(url_for("company_api.company_dashboard"))
+    new_status = request.form.get("status", "").strip()
+    if not new_status:
+        flash("Status is required.", "warning")
+        return redirect(url_for("company_api.stu_apply", drive_id=application.drive_id))
+    application.status = new_status
     db.session.commit()
     return redirect(url_for('company_api.stu_apply',drive_id=application.drive_id))
 

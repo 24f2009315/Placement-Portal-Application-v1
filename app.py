@@ -1,5 +1,5 @@
-from flask import Flask,flash,redirect,url_for
-from application.models import db , Users
+from flask import Flask
+from application.models import db, Users
 from application.auth import api as auth_api
 from application.admin import api as admin_api
 from application.company import api as company_api
@@ -34,9 +34,9 @@ def create_app():
             db.session.add(admin)
             db.session.commit()
     app.register_blueprint(auth_api,url_prefix="/")
-    app.register_blueprint(admin_api,url_prefix="/admin")
-    app.register_blueprint(company_api,url_prefix="/company")
-    app.register_blueprint(student_api,url_prefix="/student")
+    app.register_blueprint(admin_api,url_prefix="")
+    app.register_blueprint(company_api,url_prefix="")
+    app.register_blueprint(student_api,url_prefix="")
     app.register_blueprint(drive_api,url_prefix="/drive")
     app.register_blueprint(application_api,url_prefix="/application")
 

@@ -1,14 +1,13 @@
-from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for
-from application.models import Users,Company,db,Student
-from flask_login import login_user,logout_user,login_required,current_user
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from application.models import Company, Student, Users, db
+from flask_login import login_user, logout_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 
 api = Blueprint("auth_api",__name__)
 
 @api.route("/",methods=["GET"])
 def index():
-    if request.method == "GET":
-        return render_template("index.html")
+    return render_template("index.html")
     
 @api.route("/login",methods=["GET","POST"])
 def login():
@@ -33,11 +32,15 @@ def login():
     
         if user.role == "company":
             company=Company.query.filter_by(user_id=user.user_id).first()
+            if not company:
+                flash("Company profile missing. Contact admin.", category="warning")
+                return redirect(url_for("auth_api.login"))
             if company.status != "approved":
                 flash("you cant login until approved")
                 return redirect(url_for("auth_api.login"))
         
-        login_user(user)
+        login_user(user, remember=True)
+        session.permanent = True
         flash("Login Successful",category="success")
 
         if user.role == "student":
@@ -52,7 +55,7 @@ def login():
 @api.route("/company_signup",methods=["GET","POST"])
 def company_signup():
     if request.method == "GET":
-        return render_template("company/signup.html")
+        return render_template("com_signup.html")
     if request.method == "POST":
         name = request.form.get("name","").strip()
         username = request.form.get("username","").strip()
@@ -106,13 +109,13 @@ def company_signup():
         db.session.commit()
 
         flash("Registration Successful",category="success")
-        return render_template("company/signup.html")
+        return render_template("index.html")
     
 @api.route("/student_signup",methods=["GET","POST"])
 def student_signup():
     if request.method == "GET":
         selected_degree=request.args.get("degree")
-        return render_template("student/signup.html",selected_degree=selected_degree)
+        return render_template("stu_signup.html",selected_degree=selected_degree)
     if request.method == "POST":
         name = request.form.get("name","").strip()
         username = request.form.get("username","").strip()
@@ -184,7 +187,7 @@ def student_signup():
         
         if not name or not username:
             flash("both name and username are reuqired",category="warning")
-            return render_template("student/signup.html")
+            return render_template("stu_signup.html")
         
         new_user = Users(name=name,username=username,password=generate_password_hash(password,method="pbkdf2:sha256"),role="student",is_active=True)
         db.session.add(new_user)

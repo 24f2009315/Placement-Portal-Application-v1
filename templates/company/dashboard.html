@@ -2,6 +2,9 @@
 {% block body %}
 
 <div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('company_api.shortlisted_candidates') }}" class="btn btn-primary me-2">
+        Shortlisted Candidates
+    </a>
     <a href="{{ url_for('company_api.create_drive') }}" class="btn btn-success">
         Create Drive
     </a>
@@ -38,43 +41,31 @@
         });
     }
 </script>
-<h2>Upcoming Drives</h2>
+<h2>Pending Approval</h2>
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Drive No</th>
             <th>Drive Name</th>
-            <th>Actions</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody>
-        {% for dri in upcoming_drives %}
+        {% for dri in pending_drives %}
         <tr>
             <td>{{ dri.drive_id }}</td>
             <td>{{ dri.name }}</td>
-            <td>
-                <a href="{{ url_for('company_api.stu_apply', drive_id=dri.drive_id) }}"
-                   class="btn btn-primary btn-sm">
-                    View Details
-                </a>
-                <form method="POST" action="{{ url_for('company_api.mark_complete', drive_id=dri.drive_id) }}" style="display:inline;">
-                    <button type="submit" class="btn btn-success btn-sm">
-                        Mark as Complete
-                    </button>
-                </form>
-            </td>
+            <td><span class="badge text-bg-warning">Pending</span></td>
         </tr>
         {% else %}
         <tr>
-            <td colspan="3" class="text-center">
-                No placement drives created yet.
-            </td>
+            <td colspan="3" class="text-center">No pending drives.</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<h2>Past Drives</h2>
+<h2>Approved Drives</h2>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -84,32 +75,75 @@
         </tr>
     </thead>
     <tbody>
-        {% for dri in past_drives %}
+        {% for dri in approved_drives %}
         <tr>
             <td>{{ dri.drive_id }}</td>
             <td>{{ dri.name }}</td>
             <td>
                 <a href="{{ url_for('company_api.stu_apply', drive_id=dri.drive_id) }}"
-                   class="btn btn-primary btn-sm">
-                    View Details
-                </a>
+                   class="btn btn-primary btn-sm">View Details</a>
 
-                <a href="#"
-                   class="btn btn-danger btn-sm">
-                    Delete
-                </a>
-
-                <a href="#"
-                   class="btn btn-warning btn-sm">
-                    Update
-                </a>
+                <form method="POST"
+                      action="{{ url_for('company_api.mark_complete', drive_id=dri.drive_id) }}"
+                      style="display:inline;">
+                    <button type="submit" class="btn btn-success btn-sm">Mark as Complete</button>
+                </form>
             </td>
         </tr>
         {% else %}
         <tr>
-            <td colspan="3" class="text-center">
-                No placement drives marked complete yet.
+            <td colspan="3" class="text-center">No approved drives yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Closed Drives</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Drive No</th>
+            <th>Drive Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dri in closed_drives %}
+        <tr>
+            <td>{{ dri.drive_id }}</td>
+            <td>{{ dri.name }}</td>
+            <td>
+                <a href="{{ url_for('company_api.stu_apply', drive_id=dri.drive_id) }}"
+                   class="btn btn-primary btn-sm">View Details</a>
             </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3" class="text-center">No closed drives yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Rejected Drives</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Drive No</th>
+            <th>Drive Name</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for dri in rejected_drives %}
+        <tr>
+            <td>{{ dri.drive_id }}</td>
+            <td>{{ dri.name }}</td>
+            <td><span class="badge text-bg-danger">Rejected</span></td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3" class="text-center">No rejected drives.</td>
         </tr>
         {% endfor %}
     </tbody>

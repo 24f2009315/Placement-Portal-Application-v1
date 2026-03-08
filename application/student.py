@@ -1,17 +1,22 @@
-from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for,jsonify
-from application.authz import role_required
-from application.models import Users,Company,db,Student,Placement,Application
-from flask_login import login_user,logout_user,login_required,current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+from application.models import Application, Company, Placement, Student, Users, db
+from flask_login import current_user, login_required
 
 api = Blueprint("student_api",__name__)
 
-@api.route("/student/student_dashboard",methods=["GET","POST","PUT","PATCH","DELETE"])
+@api.before_request
 @login_required
-@role_required("student")
+def require_student():
+    if current_user.role != "student":
+        return "Access Denied", 403
+
+@api.route("/student/student_dashboard", methods=["GET"])
 def student_dashboard():
     registered_companies = Company.query.filter_by(status="approved").all()
     student = Student.query.filter_by(user_id = current_user.user_id).first()
+    if not student:
+        flash("Student profile missing. Contact admin.", "warning")
+        return redirect(url_for("auth_api.login"))
     applied_drives = Application.query.filter_by(student_id = student.student_id).all()
     status_counts = {}
     for app in applied_drives:
@@ -28,30 +33,41 @@ def student_dashboard():
                            student_chart_data=student_chart_data)
 
 @api.route("/student/view_drives/<int:company_id>",methods=["GET"])
-@login_required
-@role_required("student")
 def view_drives(company_id):
     company = Company.query.filter_by(company_id=company_id).first()
-    drives = Placement.query.filter_by(company_id=company_id,status="open").all()
+    drives = Placement.query.filter_by(company_id=company_id,status="approved").all()
     return render_template("student/view_drives.html",company=company,drives=drives)
 
 @api.route("/student/view_drive/<int:drive_id>", methods=["GET"])
-@login_required
-@role_required("student")
 def view_drive(drive_id):
 
     drive = Placement.query.filter_by(drive_id=drive_id).first()
+    if not drive:
+        flash("Drive not found.", "warning")
+        return redirect(url_for("student_api.student_dashboard"))
     company = Company.query.get(drive.company_id)
+    if not company:
+        flash("Company record missing for this drive.", "warning")
+        return redirect(url_for("student_api.student_dashboard"))
 
     return render_template("student/drive.html",drive=drive,company=company)
 
 @api.route("/student/apply_drive/<int:drive_id>",methods=["POST"])
-@login_required
-@role_required("student")
 def apply_drive(drive_id):
     student = Student.query.filter_by(user_id=current_user.user_id).first()
+    if not student:
+        flash("Student profile missing. Contact admin.", "warning")
+        return redirect(url_for("auth_api.login"))
+    drive = Placement.query.filter(
+        Placement.drive_id == drive_id,
+        Placement.status.in_(["approved", "open"]),
+    ).first()
+    if not drive:
+        flash("Drive not found or closed.", "warning")
+        return redirect(url_for("student_api.student_dashboard"))
 
-    existing_application = Application.query.filter_by(student_id=student.student_id,drive_id=drive_id).first()
+
+    existing_application = Application.query.filter_by(student_id=student.student_id,drive_id=drive.drive_id).first()
 
     if existing_application:
         flash("You have already applied to this drive", "warning")
@@ -64,9 +80,7 @@ def apply_drive(drive_id):
     flash("applied successfully",category="alert-success")
     return redirect(url_for('student_api.student_dashboard'))
 
-@api.route("/student/search",methods=["GET","POST"])
-@login_required
-@role_required("student")
+@api.route("/student/search", methods=["GET"])
 def search():
     query=request.args.get("query","").strip()
     companies=[]
@@ -77,8 +91,6 @@ def search():
     return render_template("student/search.html",companies=companies)
 
 @api.route("/profile/update", methods=["GET", "POST"])
-@login_required
-@role_required("student")
 def update_profile():
     student = Student.query.filter_by(user_id=current_user.user_id).first()
 

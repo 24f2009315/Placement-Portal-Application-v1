@@ -43,7 +43,7 @@ class Placement(db.Model):
     description=db.Column(db.Text())
     eligibility=db.Column(db.String(200))
     deadline=db.Column(db.Date())
-    status=db.Column(db.String(30),default="open") #open/closed
+    status=db.Column(db.String(30),default="pending") #pending/approved/rejected/closed
 
     company = db.relationship("Company",backref="placement")
 

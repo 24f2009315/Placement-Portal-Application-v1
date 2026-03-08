@@ -1,8 +1,5 @@
-from flask import Flask,Blueprint,render_template,request,flash,redirect,url_for,jsonify
-from application.models import Users,Company,db,Student,Placement,Application
-from flask_login import login_user,logout_user,login_required,current_user
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from flask import Blueprint, jsonify, request
+from application.models import Application, db
 
 api = Blueprint("application_api",__name__)
 

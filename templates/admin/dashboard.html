@@ -1,5 +1,40 @@
 {% extends "admin/layout.html" %}
 {% block body %}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <h6 class="mb-1">Total Companies</h6>
+                <h3 class="mb-0">{{ total_companies }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h6 class="mb-1">Total Students</h6>
+                <h3 class="mb-0">{{ total_students }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <h6 class="mb-1">Total Applications</h6>
+                <h3 class="mb-0">{{ total_applications }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <h6 class="mb-1">Total Drives</h6>
+                <h3 class="mb-0">{{ total_placements }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card mb-4">
     <div class="card-body">
         <h4 class="mb-3">Platform Overview</h4>
@@ -34,8 +69,7 @@
 </script>
 <h2>Registered Companies</h2>
 <div class="container-fluid d-flex flex-wrap">
-    {% for com in all_companies %}
-    {% if com.status == "approved" %}
+    {% for com in approved_companies %}
         <div class="card col-3 m-2">
             <div class="card-body">
                 <h3 align="center">{{ com.user.name }}</h3>
@@ -53,13 +87,13 @@
                 </form>
             </div>
         </div>
-    {% endif %}
+    {% else %}
+        <p class="text-muted">No approved companies.</p>
     {% endfor %}
 </div>
 <h2>Company Applications</h2>
 <div class="container-fluid d-flex flex-wrap">
-    {% for com in all_companies %}
-    {% if com.status == "pending" %}
+    {% for com in pending_companies %}
         <div class="card col-3 m-2">
             <div class="card-body">
                 <h3 align="center">{{ com.user.name }}</h3>
@@ -81,13 +115,13 @@
                 </form>
             </div>
         </div>
-    {% endif %}
+    {% else %}
+        <p class="text-muted">No pending company applications.</p>
     {% endfor %}
 </div>
 <h2>Registered Students</h2>
 <div class="container-fluid d-flex flex-wrap">
-    {% for stu in all_students %}
-    {% if stu.status == "active" %}
+    {% for stu in active_students %}
         <div class="card col-3 m-2">
             <div class="card-body">
                 <h3 align="center">{{ stu.user.name }}</h3>
@@ -101,26 +135,43 @@
                 </form>
             </div>
         </div>
-    {% endif %}
+    {% else %}
+        <p class="text-muted">No active students.</p>
     {% endfor %}
 </div>
-<h2>Placement Drives</h2>
-{% for company in all_companies %}
-<h2>{{ company.name }}</h2>
-{% endfor %}
-
+<h2>Pending Placement Drives</h2>
 <div class="card col-6 m-3">
     <div class="card-body">
         {% for drive in all_placements %}
-        {% if drive.status == "open" %}
+        {% if (drive.status or "")|lower in ["pending", "open"] %}
         <h4>{{ drive.name }}</h4>
-
         <p>{{ drive.description }}</p>
-
         <p>
             <strong>Eligibility:</strong>
             {{ drive.eligibility }}
         </p>
+        <form method="POST" action="{{ url_for('admin_api.approve_drive', drive_id=drive.drive_id) }}">
+            <button class="btn btn-success btn-sm">Approve</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin_api.reject_drive', drive_id=drive.drive_id) }}">
+            <button class="btn btn-warning btn-sm">Reject</button>
+        </form>
+        <hr>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<h2>Approved Placement Drives</h2>
+<div class="card col-6 m-3">
+    <div class="card-body">
+        {% for drive in all_placements %}
+        {% if (drive.status or "")|lower == "approved" %}
+        <h4>{{ drive.name }}</h4>
+        <p>{{ drive.description }}</p>
+        <p><strong>Eligibility:</strong> {{ drive.eligibility }}</p>
+        <p><strong>Status:</strong> {{ drive.status }}</p>
+        <hr>
         {% endif %}
         {% endfor %}
     </div>
