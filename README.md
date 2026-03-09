@@ -32,7 +32,7 @@ The project uses server-rendered Flask templates for the web UI and also exposes
 Placement-Portal-Application-v1/
 |-- app.py
 |-- requirements.txt
-|-- openapi.yaml
+|-- api.yaml
 |-- application/
 |-- templates/
 `-- instance/
