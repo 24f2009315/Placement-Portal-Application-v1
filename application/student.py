@@ -1,14 +1,20 @@
 from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from application.models import Application, Company, Placement, Student, Users, db
-from flask_login import current_user, login_required
+from flask_login import current_user
 
 api = Blueprint("student_api",__name__)
 
 @api.before_request
-@login_required
 def require_student():
+    if not current_user.is_authenticated:
+        return redirect(url_for("auth_api.login"))
     if current_user.role != "student":
-        return "Access Denied", 403
+        flash("Unauthorized access", "warning")
+        if current_user.role == "admin":
+            return redirect(url_for("admin_api.admin_dashboard"))
+        if current_user.role == "company":
+            return redirect(url_for("company_api.company_dashboard"))
+        return redirect(url_for("auth_api.login"))
 
 @api.route("/student/student_dashboard", methods=["GET"])
 def student_dashboard():

@@ -1,0 +1,581 @@
+openapi: 3.0.3
+info:
+  title: Placement Portal API
+  version: 1.0.0
+  description: OpenAPI definition for the JSON APIs exposed by the Placement Portal Flask app.
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+tags:
+  - name: Companies
+  - name: Students
+  - name: Drives
+  - name: Applications
+paths:
+  /api/companies:
+    get:
+      tags: [Companies]
+      summary: List companies
+      operationId: listCompanies
+      responses:
+        '200':
+          description: Company list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanySummary'
+    post:
+      tags: [Companies]
+      summary: Create a company and its user account
+      operationId: createCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanyRequest'
+      responses:
+        '201':
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCompanyResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/companies/{company_id}:
+    put:
+      tags: [Companies]
+      summary: Update a company
+      operationId: updateCompany
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyRequest'
+      responses:
+        '200':
+          description: Company updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Companies]
+      summary: Delete a company and its user account
+      operationId: deleteCompany
+      parameters:
+        - $ref: '#/components/parameters/CompanyId'
+      responses:
+        '200':
+          description: Company deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/students:
+    get:
+      tags: [Students]
+      summary: List students
+      operationId: listStudents
+      responses:
+        '200':
+          description: Student list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentSummary'
+    post:
+      tags: [Students]
+      summary: Create a student and its user account
+      operationId: createStudent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudentRequest'
+      responses:
+        '201':
+          description: Student created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateStudentResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/students/{student_id}:
+    put:
+      tags: [Students]
+      summary: Update a student
+      operationId: updateStudent
+      parameters:
+        - $ref: '#/components/parameters/StudentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentRequest'
+      responses:
+        '200':
+          description: Student updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Students]
+      summary: Delete a student and its user account
+      operationId: deleteStudent
+      parameters:
+        - $ref: '#/components/parameters/StudentId'
+      responses:
+        '200':
+          description: Student deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Student not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/drives:
+    get:
+      tags: [Drives]
+      summary: List drives
+      operationId: listDrives
+      responses:
+        '200':
+          description: Drive list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DriveSummary'
+    post:
+      tags: [Drives]
+      summary: Create a drive
+      operationId: createDrive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDriveRequest'
+      responses:
+        '201':
+          description: Drive created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateDriveResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/drives/{drive_id}:
+    put:
+      tags: [Drives]
+      summary: Update a drive
+      operationId: updateDrive
+      parameters:
+        - $ref: '#/components/parameters/DriveId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDriveRequest'
+      responses:
+        '200':
+          description: Drive updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Drive not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Drives]
+      summary: Delete a drive
+      operationId: deleteDrive
+      parameters:
+        - $ref: '#/components/parameters/DriveId'
+      responses:
+        '200':
+          description: Drive deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Drive not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/applications:
+    get:
+      tags: [Applications]
+      summary: List applications
+      operationId: listApplications
+      responses:
+        '200':
+          description: Application list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApplicationSummary'
+    post:
+      tags: [Applications]
+      summary: Create an application
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationRequest'
+      responses:
+        '201':
+          description: Application created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateApplicationResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/applications/{application_id}:
+    put:
+      tags: [Applications]
+      summary: Update an application
+      operationId: updateApplication
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApplicationRequest'
+      responses:
+        '200':
+          description: Application updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Applications]
+      summary: Delete an application
+      operationId: deleteApplication
+      parameters:
+        - $ref: '#/components/parameters/ApplicationId'
+      responses:
+        '200':
+          description: Application deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Application not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  parameters:
+    CompanyId:
+      name: company_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    StudentId:
+      name: student_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    DriveId:
+      name: drive_id
+      in: path
+      required: true
+      schema:
+        type: integer
+    ApplicationId:
+      name: application_id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    CompanySummary:
+      type: object
+      properties:
+        company_id:
+          type: integer
+        name:
+          type: string
+      required: [company_id, name]
+
+    CreateCompanyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        website:
+          type: string
+          nullable: true
+      required: [name, username, password]
+
+    UpdateCompanyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        hr_contact:
+          type: string
+        website:
+          type: string
+
+    CreateCompanyResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        company_id:
+          type: integer
+        user_id:
+          type: integer
+      required: [message, company_id, user_id]
+
+    StudentSummary:
+      type: object
+      properties:
+        student_id:
+          type: integer
+        name:
+          type: string
+      required: [student_id, name]
+
+    CreateStudentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        roll_no:
+          type: string
+      required: [name, username, password, roll_no]
+
+    UpdateStudentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        roll_no:
+          type: string
+        phone:
+          type: string
+        department:
+          type: string
+        degree:
+          type: string
+        batch_year:
+          type: integer
+        cgpa:
+          type: number
+          format: float
+        resume_url:
+          type: string
+
+    CreateStudentResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        student_id:
+          type: integer
+        user_id:
+          type: integer
+      required: [message, student_id, user_id]
+
+    DriveSummary:
+      type: object
+      properties:
+        drive_id:
+          type: integer
+        name:
+          type: string
+          nullable: true
+      required: [drive_id]
+
+    CreateDriveRequest:
+      type: object
+      properties:
+        company_id:
+          type: integer
+        name:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        eligibility:
+          type: string
+        deadline:
+          type: string
+          format: date
+          description: Must be sent as YYYY-MM-DD.
+      required: [company_id, title]
+
+    UpdateDriveRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        eligibility:
+          type: string
+        deadline:
+          type: string
+          description: Current code accepts any value, but date string is the intended format.
+
+    CreateDriveResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        drive_id:
+          type: integer
+      required: [message, drive_id]
+
+    ApplicationSummary:
+      type: object
+      properties:
+        application_id:
+          type: integer
+        student_id:
+          type: integer
+        drive_id:
+          type: integer
+        status:
+          type: string
+      required: [application_id, student_id, drive_id, status]
+
+    CreateApplicationRequest:
+      type: object
+      properties:
+        student_id:
+          type: integer
+        drive_id:
+          type: integer
+      required: [student_id, drive_id]
+
+    UpdateApplicationRequest:
+      type: object
+      properties:
+        status:
+          type: string
+
+    CreateApplicationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        application_id:
+          type: integer
+      required: [message, application_id]
