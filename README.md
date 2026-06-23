@@ -88,3 +88,6 @@ Implemented API groups:
 - The application uses SQLite with `sqlite:///model.db`.
 - Session configuration and app bootstrapping are defined in [app.py](/c:/Users/mvnr7/Placement-Portal-Application-v1/app.py).
 - The web UI routes and the JSON API routes are both part of the same Flask application.
+
+## Watch the Video Here
+[https://drive.google.com/file/d/145oGVoo6vpYfxyPLk2avdnWeXbZYYMU-/view?usp=drive_link]
